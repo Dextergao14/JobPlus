@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+    <fullyQualifiedTypeName name="java.io.PrintWriter"/>
+    <fullyQualifiedTypeName name="java.io.IOException"/>
+    <fullyQualifiedTypeName name="java.io.InputStreamReader"/>
+    <fullyQualifiedTypeName name="java.io.UnsupportedEncodingException"/>
+    <fullyQualifiedTypeName name="org.apache.http.HttpEntity"/>
+    <fullyQualifiedTypeName name="org.apache.http.client.methods.CloseableHttpResponse"/>
+    <fullyQualifiedTypeName name="org.apache.http.client.methods.HttpGet"/>
+    <fullyQualifiedTypeName name="org.apache.http.impl.client.HttpClients"/>
+    <fullyQualifiedTypeName name="org.apache.http.impl.client.CloseableHttpClient"/>
+    <fullyQualifiedTypeName name="external.AdzunaClient"/>
+    <fullyQualifiedTypeName name="org.json.JSONObject"/>
+    <fullyQualifiedTypeName name="org.json.JSONException"/>
+    <fullyQualifiedTypeName name="org.json.JSONArray"/>
+    <fullyQualifiedTypeName name="java.util.ArrayList"/>
+    <fullyQualifiedTypeName name="java.util.List"/>
+    <fullyQualifiedTypeName name="entity.Item"/>
+    <fullyQualifiedTypeName name="entity.Item.ItemBuilder"/>
+    <fullyQualifiedTypeName name="java.io.InputStream"/>
+</qualifiedTypeNameHistroy>
