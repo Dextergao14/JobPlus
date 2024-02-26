@@ -1,0 +1,32 @@
+package external;
+
+import com.ibm.watson.natural_language_understanding.v1.NaturalLanguageUnderstanding;
+import com.ibm.watson.natural_language_understanding.v1.model.AnalysisResults;
+import com.ibm.watson.natural_language_understanding.v1.model.AnalyzeOptions;
+import com.ibm.watson.natural_language_understanding.v1.model.EntitiesOptions;
+import com.ibm.watson.natural_language_understanding.v1.model.Features;
+import com.ibm.cloud.sdk.core.*;
+import com.ibm.cloud.*;
+import com.ibm.cloud.sdk.*;
+import com.ibm.*;
+
+
+public class IBMWatsonNLU {
+	Authenticator authenticator = new IamAuthenticator("1y_QK-XyG3UGvhQu5TKMGufCm4IjKi1wIFf4LsqIN89f");
+	NaturalLanguageUnderstanding service = new NaturalLanguageUnderstanding("2019-07-12", authenticator);
+
+	EntitiesOptions entities = new EntitiesOptions.Builder()
+	  .sentiment(true)
+	  .limit(1L)
+	  .build();
+	Features features = new Features.Builder()
+	  .entities(entities)
+	  .build();
+	AnalyzeOptions parameters = new AnalyzeOptions.Builder()
+	  .url("www.cnn.com")
+	  .features(features)
+	  .build();
+
+	AnalysisResults results = service.analyze(parameters).execute().getResult();
+	System.out.println(results);
+}

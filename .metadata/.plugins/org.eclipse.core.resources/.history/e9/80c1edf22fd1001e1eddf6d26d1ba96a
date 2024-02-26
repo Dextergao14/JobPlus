@@ -1,0 +1,21 @@
+package external;
+
+public class IBMWatsonNLU {
+	Authenticator authenticator = new IamAuthenticator("<iam_api_key>");
+	NaturalLanguageUnderstanding service = new NaturalLanguageUnderstanding("2019-07-12", authenticator);
+
+	EntitiesOptions entities = new EntitiesOptions.Builder()
+	  .sentiment(true)
+	  .limit(1L)
+	  .build();
+	Features features = new Features.Builder()
+	  .entities(entities)
+	  .build();
+	AnalyzeOptions parameters = new AnalyzeOptions.Builder()
+	  .url("www.cnn.com")
+	  .features(features)
+	  .build();
+
+	AnalysisResults results = service.analyze(parameters).execute().getResult();
+	System.out.println(results);
+}

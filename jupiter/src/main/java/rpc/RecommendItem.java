@@ -1,16 +1,22 @@
 package rpc;
 
 import java.io.IOException;
+
 import java.io.PrintWriter;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import entity.Item;
+import recommendation.Recommendation;
 
 
 
@@ -35,16 +41,24 @@ public class RecommendItem extends HttpServlet {
 //		response.setContentType("application/json");
 //		PrintWriter writer = response.getWriter();
 		
-		JSONArray array = new JSONArray();
-		try {
-			array.put(new JSONObject().put("name", "abcd").put("address", 
-					"San Francisco").put("time", "01/01/2023"));
-			array.put(new JSONObject().put("name", "abcd").put("address", 
-					"San Jose").put("time", "01/01/2023"));
-		} catch(JSONException e) {
-			e.printStackTrace();
+		HttpSession session = request.getSession(false);
+		if (session == null) {
+			response.setStatus(403);
+			return;
 		}
-//		writer.print(array);
+		String userId = request.getParameter("user_id");
+		
+		String apiId = request.getParameter("app_id");
+		String apiKey = request.getParameter("app_key");
+		String position = request.getParameter("what");
+		String location = request.getParameter("where");
+
+		Recommendation recommendation = new Recommendation();
+		List<Item> items = recommendation.recommendItems(userId, position, location);
+		JSONArray array = new JSONArray();
+		for (Item item : items) {
+			array.put(item.toJSONObject());
+		}
 		RpcHelper.writeJsonArray(response, array);
 	}
 

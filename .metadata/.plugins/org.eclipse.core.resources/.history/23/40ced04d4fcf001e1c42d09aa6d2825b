@@ -1,0 +1,115 @@
+package entity;
+
+import java.util.Set;
+
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public class Item {
+	private String itemId;
+	private String name;
+	private JSONObject address;
+	private Set<String> keywords;
+	private String imageUrl;
+	private String url;
+	private String createdAt;
+	
+	private Item() {}
+//	public Item(ItemBuilder builder) {
+//		this.itemId = builder.itemId;
+//		this.name = builder.name;
+//		this.address = builder.address;
+//		this.imageUrl = builder.imageUrl;
+//		this.url = builder.url;
+//		this.keywords = builder.keywords;
+		
+//	}
+	public String getitemId() {
+		return itemId;
+	}
+	public String getName() {
+		return name;
+	}
+	public JSONObject getAddress() {
+		return address;
+	}
+	public Set<String> getKeywords() {
+		return keywords;
+	}
+	public String getImageUrl() {
+		return imageUrl;
+	}
+	public String getUrl() {
+		return url;
+	}
+	
+	public String getCreatedAt() {
+		return createdAt;
+	}
+	
+	public JSONObject toJSONObject() {
+		JSONObject obj = new JSONObject();
+		try {
+			obj.put("item_id", itemId);
+			obj.put("name", name);
+			obj.put("address", new JSONObject(address));
+			obj.put("keywords", new JSONArray(keywords));
+			obj.put("image_url", imageUrl);
+			obj.put("url", url);
+			obj.put("created at", createdAt);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return obj;
+	}
+	
+	public static class ItemBuilder {
+		private Item item;
+		
+		public ItemBuilder() {
+			item = new Item();
+		}
+		
+		public ItemBuilder setItemId(String itemId) {
+			item.itemId = itemId;
+			return this;
+		}
+		
+		public ItemBuilder setName(String name) {
+			item.name = name;
+			return this;
+		}
+		
+		public ItemBuilder setAddress(JSONObject address) {
+			item.address = address;
+			return this;
+		}
+		
+		public ItemBuilder setImageUrl(String imageUrl) {
+			item.imageUrl = imageUrl;
+			return this;
+		}
+		
+		public ItemBuilder setUrl(String url) {
+			item.url = url;
+			return this;
+		}
+		
+		public ItemBuilder setKeywords(Set<String> keywords) {
+			item.keywords = keywords;
+			return this;
+		}
+		
+		public ItemBuilder setCreatedAt(String createdAt) {
+			item.createdAt = createdAt;
+			return this;
+		}
+		
+		public Item build() {
+			return item;
+		}
+	}
+
+}

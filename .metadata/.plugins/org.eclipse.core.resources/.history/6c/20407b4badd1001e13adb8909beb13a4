@@ -1,0 +1,175 @@
+package external;
+
+import java.io.BufferedReader;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.ibm.watson.natural_language_understanding.v1.model.AnalysisResults;
+
+import entity.Item;
+import entity.Item.*;
+import entity.Item.ItemBuilder;
+
+public class AdzunaClient {
+	private static final String URL_TEMPLATE = 
+			"https://api.adzuna.com/v1/api/jobs/us/search/"
+			+ "1?app_id=%s&app_key=%s&results_per_page=50&what=%s&where=%s&distance=100&max_days_old=60&sort_by=salary&full_time=1";
+	
+	public static final String APP_ID = "bfa0513a";
+	public static final String APP_KEY = "092433561360b79effdca321ed0eaf68";
+	private static final String DEFAULT_KEYWORD = "software%20engineer";
+	private static final String DEFAULT_LOCATION = "New York";
+	
+	public String getID() {
+		return APP_ID;
+	}
+	
+	public String getKEY() {
+		return APP_KEY;
+	}
+	
+	
+	public List<Item> search(String id, String key, String keyword, String location) {
+		if (id == null) {
+			id = APP_ID;
+		}
+		if (key == null) {
+			key = APP_KEY;
+		}
+		if (keyword == null) {
+			keyword = DEFAULT_KEYWORD;
+		}
+		
+		if (location == null) {
+			location = DEFAULT_KEYWORD;
+		}
+		
+		try {
+			id = URLEncoder.encode(id, "UTF-8");
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
+		}
+		try {
+			key = URLEncoder.encode(key, "UTF-8");
+		} catch (UnsupportedEncodingException e2) {
+			e2.printStackTrace();
+		}
+		
+		try {
+			keyword = URLEncoder.encode(keyword, "UTF-8");
+		} catch (UnsupportedEncodingException e3) {
+			e3.printStackTrace();
+		}
+		
+		try {
+			location = URLEncoder.encode(location, "UTF-8");
+		} catch (UnsupportedEncodingException e4) {
+			e4.printStackTrace();
+		}
+		
+		String url = String.format(URL_TEMPLATE, id, key, keyword, location);
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+		try {
+			CloseableHttpResponse response = httpClient.execute(new HttpGet(url));
+			if (response.getStatusLine().getStatusCode() != 200) {
+					return new ArrayList<Item>();
+			}
+			
+			
+			HttpEntity entity = response.getEntity();
+			if (entity == null) {return new ArrayList<Item>();}
+			BufferedReader reader = new BufferedReader(new InputStreamReader(entity.getContent()));
+			
+			StringBuilder responseBody = new StringBuilder();
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				responseBody.append(line);
+			}
+			JSONObject obj = new JSONObject(responseBody.toString());
+			JSONArray arr = obj.getJSONArray("results");
+			return getItemList(arr);
+			
+		} catch (ClientProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return new ArrayList<Item>();
+	}
+	
+	public List<Item> getItemList(JSONArray arr) {
+		List<Item> itemList = new ArrayList<>();
+		List<String> descriptionList = new ArrayList<>();
+		
+		for (int i = 0; i < arr.length(); ++i) {
+			JSONObject obj = arr.getJSONObject(i);
+			ItemBuilder builder = new ItemBuilder();
+			builder.setItemId(getStringFieldOrEmpty(obj, "id"));
+			builder.setName(getStringFieldOrEmpty(obj, "title"));
+			builder.setUrl(getStringFieldOrEmpty(obj, "redirect_url"));
+			builder.setDescription(getStringFieldOrEmpty(obj, "description"));
+
+			
+			
+			if (obj.getString("description").equals("\n")) {
+				descriptionList.add(obj.getString("title"));
+			} else {
+				descriptionList.add(obj.getString("description"));
+			}
+			
+			Item item = builder.build();
+			itemList.add(item);
+		}
+		
+		// We need to get keywords from multiple text in one request since
+				// MonkeyLearnAPI has a limitation on request per minute.
+				String[] descriptionArray = descriptionList.toArray(new String[descriptionList.size()]); // Convert list to an array of the same type.
+				List<List<String>> keywords = new ArrayList<>();
+				// Call IBM Watson API.
+				for (int i = 0; i < descriptionArray.length; i++) {
+					AnalysisResults res = IBMWatsonNLU.analyzeKeywords(descriptionArray[i], IBMWatsonNLU.IBM_API_KEY);
+					keywords.add(IBMWatsonNLU.extractTextFromJson(res));
+				}
+				 
+				for (int i = 0; i < keywords.size(); ++i) {
+					List<String> list = keywords.get(i);
+					// Why do we use HashSet but List here?
+					Set<String> set = new HashSet<String>(list);
+					itemList.get(i).setKeywords(set);
+				}
+		
+		return itemList;
+	}
+	
+	private String getStringFieldOrEmpty(JSONObject obj, String field) {
+		return obj.isNull(field) ? "" : obj.getString(field);
+	}
+	
+	
+	public static void main(String[] args) {
+		AdzunaClient client = new AdzunaClient();
+		List<Item> itemList = client.search(APP_ID, APP_KEY, "Architect", "New York");
+		for (Item item : itemList) {
+			JSONObject jObj = item.toJSONObject();
+			System.out.println(jObj);
+		}
+	}
+	
+	
+}
