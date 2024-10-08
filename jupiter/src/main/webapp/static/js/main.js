@@ -291,7 +291,7 @@ function displaySearchResults(results) {
 
 		// error
 		function() {
-			showRegisterResult('Failed to register');
+			showRegisterResult('Failed to register， error code:' + result.status);
 		}, true);
 	}
 
